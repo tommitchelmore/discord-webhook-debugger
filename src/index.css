@@ -1,0 +1,6 @@
+input {
+    box-shadow: inset 4.8px 4.8px 9px #282B2E, inset -4.8px -4.8px 9px #303338;
+    border: none !important;
+    border-radius: 5em !important;
+    padding: 1.5em !important;
+}
