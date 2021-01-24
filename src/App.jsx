@@ -53,8 +53,8 @@ function App() {
         <Box bg='dark' p='2em' borderBottomRadius='1em'>
         
           <Box>
-            <Flex mb='1em' justifyContent='center' alignItems='center' bg='textarea' boxShadow='inset 4.8px 4.8px 9px #313439, inset -4.8px -4.8px 9px #3B3E45' p="1.5em" border='none' borderRadius='5em' p={5}>
-              <Image src={state.avatar_url} borderRadius='50%' h="40px" w="40px" mr={2} />
+            <Flex mb='1em' justifyContent='center' alignItems='flex-start' bg='textarea' boxShadow='inset 4.8px 4.8px 9px #313439, inset -4.8px -4.8px 9px #3B3E45' p="1.5em" border='none' borderRadius='5em' p={5}>
+              <Image src={state.avatar_url} borderRadius='50%' h="48px" w="48px" mr={2} />
               <Box>
                 <Text fontSize="sm" fontWeight="bold">{state.username} <Badge verticalAlign="top" ml={1} fontSize="14px" bg="discord" color="light">BOT</Badge> </Text>
                 <Text fontSize="sm">{state.content}</Text>
