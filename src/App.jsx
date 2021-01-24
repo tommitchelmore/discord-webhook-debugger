@@ -1,32 +1,53 @@
-import { Badge, Box, Button, Center, Flex, Grid, GridItem, Heading, Image, Input, Link, Spacer, Text } from '@chakra-ui/react'
+import { Badge, Box, Button, Center, Flex, FormControl, FormLabel, Grid, GridItem, Heading, Image, Input, Link, Spinner, Switch, Text } from '@chakra-ui/react'
 import axios from 'axios'
 import React, { useState } from 'react'
 
 function App() {
 
+  const [url, setUrl] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  const defaultEmbed = {
+    title: "A compelling title",
+    description: "An interesting description",
+    color: "#ffffff"
+  }
+
   const [state, setState] = useState({
-    url: null,
-    message: 'Beep boop!',
+    content: 'Beep boop!',
     username: 'Stinky Bot',
     avatar_url: 'http://l.tom.network/sURJ',
-    urlError: false
+    embeds: [defaultEmbed]
+  })
+
+  const [embed, setEmbed] = useState(false)
+
+  const [errors, setErrors] = useState({
+    color: false,
+    url: false,
+    content: false,
+    title: false,
+    description: false  
   })
 
   function makeRequest() {
-    if (state.urlError) return
-    axios.post(state.url, {
-      content: state.message || 'Beep boop!',
-      username: state.username || "Stinky Bot",
-      avatar_url: state.avatar_url || "http://l.tom.network/sURJ"
-    }, {
-      
-    })
+    if (errors.url) return
+    if (!embed) {
+      delete state.embeds
+      axios.post(url, state).then((r) => {
+        setLoading(false)
+      })
+    } else {
+      axios.post(url, {...state, embeds: [{...state.embeds[0], color: parseInt(state.embeds[0].color.slice(1), 16).toString()}]}).then((r) => {
+        setLoading(false)
+      })
+    }
   }
 
   return (
-    <Center bg='dark' textColor='light' h='100vh' w='100vw'>
+    <Center background='dark' textColor='light' h='100%' w='100%' my='2em'>
       <Box w={[300, 400, 500]} borderRadius='1em' bg='dark' boxShadow='9.01px 9.01px 31px #26292C, -9.01px -9.01px 31px #32353A'>
-        <Box bg='accent' borderTopRadius='1em' p='2em'>
+        <Box bg='accent.500' borderTopRadius='1em' p='2em'>
           <Heading>Discord webhook debugging tool</Heading>
         </Box>
         <Box bg='dark' p='2em' borderBottomRadius='1em'>
@@ -36,7 +57,13 @@ function App() {
               <Image src={state.avatar_url} borderRadius='50%' h="40px" w="40px" mr={2} />
               <Box>
                 <Text fontSize="sm" fontWeight="bold">{state.username} <Badge verticalAlign="top" ml={1} fontSize="14px" bg="discord" color="light">BOT</Badge> </Text>
-                <Text fontSize="sm">{state.message}</Text>
+                <Text fontSize="sm">{state.content}</Text>
+                {embed &&
+                  <Box background="dark" borderLeft={`solid 3px ${state.embeds[0].color.length < 7 || state.embeds[0].color === "#ffffff" ? "rgb(35, 39, 42)" : state.embeds[0].color}`} borderRadius="3px" p={3} mt={1}>
+                    <Text fontSize="sm" fontWeight="bold">{state.embeds[0].title}</Text>
+                    <Text fontSize="sm">{state.embeds[0].description}</Text>
+                  </Box>
+                }
               </Box>
             </Flex>
             
@@ -45,7 +72,7 @@ function App() {
               <GridItem colSpan={2}><Input placeholder='Message' focusBorderColor='none' onChange={e => {
                 setState(s => ({
                   ...s,
-                  message: e.target.value || 'Beep boop!'
+                  content: e.target.value || 'Beep boop!'
                 }))
               }} /></GridItem>
 
@@ -63,22 +90,105 @@ function App() {
                 }))
               }} /></GridItem>
 
-              <GridItem colSpan={2}><Input isInvalid={state.urlError} placeholder='Webhook URL' focusBorderColor='none' onChange={e => {
+              <GridItem colSpan={2}>
+                <Input placeholder='Webhook URL' focusBorderColor='none'
+                  isInvalid={errors.url}
+                  onChange={e => {
 
-                const newUrl = e.target.value
-                const pattern = /https:\/\/discord.com\/api\/webhooks\/[0-9]+\/[a-zA-Z0-9]+/g
-                const valid = newUrl.match(pattern)
-                setState(s => ({
-                  ...s,
-                  url: valid ? newUrl : null,
-                  urlError: !valid
-                }))
+                    const newUrl = e.target.value
+                    const pattern = /https:\/\/discord.com\/api\/webhooks\/[0-9]+\/[a-zA-Z0-9]+/g
+                    const valid = newUrl.match(pattern)
 
-              }}/></GridItem>
+                    setUrl(valid ? newUrl : null)
 
-              <GridItem colSpan={2}><Button w='100%' bg="accent" border="solid 1px #FD0061" boxShadow='4.8px 4.8px 9px #282B2E, -4.8px -4.8px 9px #303338' borderRadius='5em' _hover={{bg: "dark", color: 'accent'}} onClick={() => makeRequest()}>Send!</Button></GridItem>
+                    setErrors(s => ({...s, url: !valid}))
+                  }}
+                />
+              </GridItem>
 
-              <GridItem colSpan={2} mt='1em' textAlign='center'>Copyright © 2021 <Link color='accent' target="_blank" rel="noreferer" href="https://tommitchelmore.com">Thomas Mitchelmore</Link></GridItem>
+              <GridItem colSpan={2}>
+                <FormControl display="flex" alignItems="center">
+                  <FormLabel htmlFor="embed" mb="0">
+                    Embed?
+                  </FormLabel>
+                  <Switch id="embed" colorScheme="accent" onChange={() => {
+                    setState(s => ({
+                      ...s,
+                      embeds: [defaultEmbed]
+                    }))
+                    setEmbed(!embed)
+                    }} />
+                </FormControl>
+              </GridItem>
+
+              {embed && <>
+                <GridItem colSpan={2}>
+                <Input placeholder='Title' focusBorderColor='none'
+                  isInvalid={errors.title}
+                  onChange={e => {
+                    setState(s => ({
+                      ...s,
+                      embeds: [{
+                        ...s.embeds[0],
+                        title: e.target.value || defaultEmbed.title
+                      }]
+                    }))
+                  }}
+                />
+                </GridItem>
+                <GridItem colSpan={2}>
+                <Input placeholder='Description' focusBorderColor='none'
+                  isInvalid={errors.description}
+                  onChange={e => {
+                    setState(s => ({
+                      ...s,
+                      embeds: [{
+                        ...s.embeds[0],
+                        description: e.target.value || defaultEmbed.description
+                      }]
+                    }))
+                  }}
+                />
+                </GridItem>
+                <GridItem colSpan={2}>
+                <Input placeholder='Color (HEX)' focusBorderColor='none'
+                  isInvalid={errors.color}
+                  onChange={e => {
+
+                    const newCol = e.target.value
+                    const pattern = /^#[a-fA-F0-9]{6}$/
+
+                    const valid = newCol.match(pattern) || newCol.length === 0
+                    setErrors(s => ({...s, color: !valid}))
+
+                    setState(s => ({
+                      ...s,
+                      embeds: [{
+                        ...s.embeds[0],
+                        color: newCol || defaultEmbed.color
+                      }]
+                    }))
+                  }}
+                />
+                </GridItem>
+              </>}
+
+              <GridItem colSpan={2}>
+                <Button
+                  w='100%' bg="accent.500" border="solid 1px #FD0061" boxShadow='4.8px 4.8px 9px #282B2E, -4.8px -4.8px 9px #303338' borderRadius='5em'
+                  _hover={{bg: "dark", color: 'accent.500'}}
+                  disabled={loading || !url || errors.color}
+                  onClick={() => makeRequest()}
+                >
+                  {loading ? <Spinner /> : "Send"}
+                </Button>
+              </GridItem>
+
+              <GridItem colSpan={2} mt='1em' textAlign='center' color='rgba(255,255,255,0.3)'>
+                Copyright © 2021
+                <Link target="_blank" rel="noreferrer noopener" href="https://tommitchelmore.com" ml={1}>Thomas Mitchelmore</Link>
+                <Link target="_blank" rel="noreferrer noopener" href="https://github.com/tommitchelmore/discord-webhook-debugger" ml={1}>(Source)</Link>
+              </GridItem>
 
             </Grid>
           </Box>

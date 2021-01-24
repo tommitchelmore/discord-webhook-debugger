@@ -8,7 +8,9 @@ const theme = extendTheme({colors: {
   darker: "rgb(35, 39, 42)",
   dark: "rgb(44, 47, 51)",
   light: "rgb(255, 255, 255)",
-  accent: "#FD0061",
+  accent: {
+    500: "#FD0061"
+  },
   discord: "#7289da",
   textarea: "#36393F"
 }})
