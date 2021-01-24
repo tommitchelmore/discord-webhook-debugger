@@ -1,6 +1,16 @@
 {
   "name": "discord-webhooks",
+  "description": "Simple debug tool for Discord's webhook API built with Vite and React. It supports a custom message, username and avatar.",
+  "homepage": "https://webhooks.tom.network/",
+  "author": {
+    "name": "Thomas Mitchelmore",
+    "email": "tommitchelmore@outlook.com",
+    "url": "https://tommitchelmore.com"
+  },
   "version": "0.0.0",
+  "license": "GNU GPL 3.0",
+  "repository": "github:tommitchelmore/discord-webhook-debugger",
+  "bugs": "https://github.com/tommitchelmore/discord-webhook-debugger/issues",
   "scripts": {
     "dev": "vite",
     "build": "vite build"
