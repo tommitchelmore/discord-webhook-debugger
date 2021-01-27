@@ -20,5 +20,6 @@ cd discord-webhook-debugger
 sudo docker build . -t discord-webhook-debugger
 sudo docker run -p 8080:8080 discord-webhook-debugger
 ```
+To update the image, simply pull the latest main branch (or clone again) and run `docker build -t discord-webhooks .` - you can then recreate your container.
 ## ⚖️ Licensing
 This software is licensed under the [GNU GPL 3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) license, please freely use, modify, contribute or reditribute as suits you however keep in mind that absolutely no warranty is provided.
