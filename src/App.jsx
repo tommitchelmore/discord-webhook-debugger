@@ -2,25 +2,27 @@ import { Badge, Box, Button, Center, Flex, FormControl, FormLabel, Grid, GridIte
 import axios from 'axios'
 import React, { useState } from 'react'
 
+const defaultEmbed = {
+  title: "A compelling title",
+  description: "An interesting description",
+  color: "#ffffff"
+}
+
 function App() {
 
+  //Util state
   const [url, setUrl] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [embed, setEmbed] = useState(false)
+  const [showJSON, setShowJSON] = useState(false)
 
-  const defaultEmbed = {
-    title: "A compelling title",
-    description: "An interesting description",
-    color: "#ffffff"
-  }
-
+  //Main app state
   const [state, setState] = useState({
     content: 'Beep boop!',
     username: 'Stinky Bot',
     avatar_url: 'http://l.tom.network/sURJ',
     embeds: [defaultEmbed]
   })
-
-  const [embed, setEmbed] = useState(false)
 
   const [errors, setErrors] = useState({
     color: false,
@@ -30,30 +32,30 @@ function App() {
     description: false  
   })
 
+  function prepareJson(currentState) {
+    let newState, embeds;
+    if (!embed) ({embeds, ...newState} = currentState)
+    else (newState = {...state, embeds: [{...currentState.embeds[0], color: parseInt(currentState.embeds[0].color.slice(1), 16).toString()}]})
+    return newState
+  }
+
   function makeRequest() {
     if (errors.url) return
-    if (!embed) {
-      delete state.embeds
-      axios.post(url, state).then((r) => {
-        setLoading(false)
-      })
-    } else {
-      axios.post(url, {...state, embeds: [{...state.embeds[0], color: parseInt(state.embeds[0].color.slice(1), 16).toString()}]}).then((r) => {
-        setLoading(false)
-      })
-    }
+    axios.post(url, prepareJson(state)).then((r) => {
+      setLoading(false)
+    })
   }
 
   return (
     <Center background='dark' textColor='light' h='100%' w='100%' my='2em'>
-      <Box w={[300, 400, 500]} borderRadius='1em' bg='dark' boxShadow='9.01px 9.01px 31px #26292C, -9.01px -9.01px 31px #32353A'>
+      <Box w={[300, 400, 700]} borderRadius='1em' bg='dark' boxShadow='9.01px 9.01px 31px #26292C, -9.01px -9.01px 31px #32353A'>
         <Box bg='accent.500' borderTopRadius='1em' p='2em'>
           <Heading>Discord webhook debugging tool</Heading>
         </Box>
         <Box bg='dark' p='2em' borderBottomRadius='1em'>
         
           <Box>
-            <Flex mb='1em' justifyContent='center' alignItems='flex-start' bg='textarea' boxShadow='inset 4.8px 4.8px 9px #313439, inset -4.8px -4.8px 9px #3B3E45' p="1.5em" border='none' borderRadius='5em' p={5}>
+            <Flex mb='1em' justifyContent='center' alignItems='flex-start' bg='textarea' boxShadow='inset 4.8px 4.8px 9px #313439, inset -4.8px -4.8px 9px #3B3E45' p="1.5em" border='none' borderRadius='2em' p={5}>
               <Image src={state.avatar_url} borderRadius='50%' h="48px" w="48px" mr={2} />
               <Box>
                 <Text fontSize="sm" fontWeight="bold">{state.username} <Badge verticalAlign="top" ml={1} fontSize="14px" bg="discord" color="light">BOT</Badge> </Text>
@@ -76,14 +78,14 @@ function App() {
                 }))
               }} /></GridItem>
 
-              <GridItem colSpan={1}><Input placeholder='Custom username' focusBorderColor='none' onChange={e => {
+              <GridItem colSpan={[2, 2, 1]}><Input placeholder='Custom username' focusBorderColor='none' onChange={e => {
                 setState(s => ({
                   ...s,
                   username: e.target.value || "Stinky Bot"
                 }))
               }} /></GridItem>
 
-              <GridItem colSpan={1}><Input placeholder='Custom avatar (url)' focusBorderColor='none' onChange={e => {
+              <GridItem colSpan={[2, 2, 1]}><Input placeholder='Custom avatar (url)' focusBorderColor='none' onChange={e => {
                 setState(s => ({
                   ...s,
                   avatar_url: e.target.value || "http://l.tom.network/sURJ"
@@ -106,7 +108,7 @@ function App() {
                 />
               </GridItem>
 
-              <GridItem colSpan={2}>
+              <GridItem colSpan={1}>
                 <FormControl display="flex" alignItems="center">
                   <FormLabel htmlFor="embed" mb="0">
                     Embed?
@@ -118,6 +120,15 @@ function App() {
                     }))
                     setEmbed(!embed)
                     }} />
+                </FormControl>
+              </GridItem>
+
+              <GridItem colSpan={1}>
+                <FormControl display="flex" alignItems="center">
+                  <FormLabel htmlFor="showjson" mb="0">
+                    Show JSON?
+                  </FormLabel>
+                  <Switch id="showjson" colorScheme="accent" onChange={() => setShowJSON(!showJSON) } />
                 </FormControl>
               </GridItem>
 
@@ -171,6 +182,23 @@ function App() {
                   }}
                 />
                 </GridItem>
+              </>}
+
+              {showJSON && <>
+              <GridItem colSpan={2}>
+                <Text mb={2}>JSON data: </Text>
+                <div className="jsonBlock"><code style={{whiteSpace: 'pre-wrap', userSelect: 'all'}} dangerouslySetInnerHTML={{__html: JSON.stringify(prepareJson(state), null, 2)}} /></div>
+              </GridItem>
+              <GridItem colSpan={2}>
+                <Text mb={2}>cURL request: </Text>
+                <div className="jsonBlock">
+                  <code style={{userSelect: 'all'}}>
+                    curl --request POST --data '{JSON.stringify(prepareJson(state))}' \<br />
+                     {url} \<br />
+                     --header "Content-Type: application/json"
+                  </code>
+                </div>
+              </GridItem>
               </>}
 
               <GridItem colSpan={2}>
