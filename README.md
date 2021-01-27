@@ -1,7 +1,7 @@
 # Discord Webhook Debugger
 Simple debug tool for Discord's webhook API built with [Vite](https://github.com/vitejs/vite) and [React](https://reactjs.org/).  It supports a custom message, username and avatar. A live demo is available at [webhooks.tom.network](https://webhooks.tom.network)
 
-![](https://i.imgur.com/pUOTSqB.png)
+![](https://i.imgur.com/ElJIfHf.png)
 
 ## 🔧 Installation
 ### Standalone
